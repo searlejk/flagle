@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flag Practice</title>
+<style>
+:root{
+  --bg:#fff;--panel:#fff;--panel2:#f5f5f5;--line:#e4e4e4;--text:#111;--mute:#777;
+  --accent:#111;--good:#2fb463;--bad:#d33;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:28px 16px 60px}
+h1{font-size:18px;font-weight:600;margin:0;letter-spacing:-.01em}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.stats{color:var(--mute);font-size:12px}
+.stats b{color:var(--text);font-weight:600}
+.panel{margin-bottom:22px}
+details.panel summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center;padding-bottom:6px}
+details.panel summary::-webkit-details-marker{display:none}
+details.panel summary .pool{color:var(--mute);font-weight:400;font-size:12px}
+.cat{display:flex;gap:8px;align-items:flex-start;margin-top:8px;flex-wrap:wrap}
+.cat .label{width:120px;flex:none;padding-top:4px;color:var(--mute);font-size:13px}
+.cat .label b{font-weight:500}
+.chips{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+.chip{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;user-select:none}
+.chip:hover{border-color:#999}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip.all{font-weight:600}
+.chip small{opacity:.55;margin-left:4px}
+.tools{margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--mute);font-size:12px}
+.tools label{display:flex;gap:6px;align-items:center;cursor:pointer}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--text);padding:6px 12px}
+button:hover{border-color:#999}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{background:#333}
+.target{display:flex;gap:16px;align-items:center;flex-wrap:wrap;min-height:150px;padding:14px 0}
+.mystery{width:225px;height:150px;border-radius:4px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:40px;color:#bbb}
+.answer{display:none}
+.answer.show{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.answer h2{margin:0 0 4px;font-size:18px;font-weight:600}
+.answer h2 span{color:var(--mute);font-size:12px;font-weight:400;display:block}
+.flag{width:225px;height:150px;object-fit:contain;background:#e8e8e8;border:1px solid var(--line);border-radius:4px;display:block}
+canvas.map{width:120px;height:80px;border-radius:4px;border:1px solid var(--line);display:block;background:#eef2f5}
+.inputrow{display:flex;gap:8px;margin:6px 0 4px;flex-wrap:wrap}
+.inputrow .box{position:relative;flex:1;min-width:220px}
+input[type=text]{width:100%;font:inherit;padding:9px 11px;border-radius:6px;border:1px solid #ccc;background:#fff;color:var(--text)}
+input[type=text]:focus{outline:none;border-color:#111}
+.dd{position:absolute;left:0;right:0;top:100%;margin-top:3px;background:#fff;border:1px solid #ccc;border-radius:6px;max-height:260px;overflow:auto;z-index:20;display:none;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.dd div{padding:6px 11px;cursor:pointer}
+.dd div.sel,.dd div:hover{background:#f0f0f0}
+.msg{color:var(--mute);font-size:12px;min-height:18px;margin-bottom:4px}
+.msg.err{color:var(--bad)}
+.legend{display:flex;gap:14px;color:var(--mute);font-size:11px;margin:2px 0 4px;align-items:center;flex-wrap:wrap}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:4px}
+.heads,.row{display:grid;grid-template-columns:150px 150px 120px 1fr;gap:14px;align-items:center}
+.heads{color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px;padding:0 0 6px;border-bottom:1px solid var(--line)}
+.row{padding:10px 0;border-bottom:1px solid var(--line)}
+.row img.gf{width:150px;height:100px;object-fit:contain;background:#e8e8e8;border:1px solid var(--line);border-radius:3px;display:block}
+.row canvas.sim{width:150px;height:100px;border-radius:3px;display:block;border:1px solid var(--line)}
+.rname{font-weight:600}
+.row.win .rname{color:var(--good)}
+.rsub{color:var(--mute);font-size:12px}
+.pct{font-size:15px;font-weight:600}
+@media(max-width:720px){
+  .heads{display:none}
+  .row{grid-template-columns:1fr 1fr;}
+  .row .info{grid-column:1/-1}
+  .cat .label{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Flag Practice</h1>
+  <div class="stats" id="stats"></div>
+</header>
+
+<details class="panel" id="setup" open>
+  <summary><span>Choose what to practice</span><span class="pool" id="poolInfo"></span></summary>
+  <div id="cats"></div>
+  <div class="tools">
+    <button id="btnAll">Whole world</button>
+    <button id="btnNone">Clear</button>
+    <label><input type="checkbox" id="limitChoices" checked> Only offer countries from my selection as answers</label>
+  </div>
+</details>
+
+<div class="panel">
+  <div class="play">
+    <div class="target">
+      <div id="mystery" class="mystery">?</div>
+      <div class="answer" id="answer">
+        <img id="ansFlag" class="flag" alt="">
+        <div><h2 id="ansName"></h2>
+          <canvas id="ansMap" class="map" width="360" height="240"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="inputrow" id="inputrow">
+    <div class="box">
+      <input type="text" id="q" placeholder="Search for a country…" autocomplete="off" spellcheck="false">
+      <div class="dd" id="dd"></div>
+    </div>
+    <button class="primary" id="btnGuess">Guess</button>
+    <button id="btnGive">Give up</button>
+    <button id="btnNext" style="display:none" class="primary">Next flag →</button>
+  </div>
+  <div class="msg" id="msg"></div>
+  <div class="legend">
+    <span><span class="sw" style="background:#78b05a"></span>same colour in the same spot as the mystery flag</span>
+    <span><span class="sw" style="background:#111"></span>different</span>
+  </div>
+</div>
+
+<div class="heads" id="heads" style="display:none"><div>Your guess</div><div>Comparison</div><div>Where it is</div><div></div></div>
+<div id="guesses"></div>
+</div>
+
+<script src="lib/d3-array.min.js"></script>
+<script src="lib/d3-geo.min.js"></script>
+<script src="lib/topojson-client.min.js"></script>
+<script src="data.js"></script>
+<script>
+/* ---------- categories ---------- */
+const GROUPS=[
+ {id:'africa',name:'Africa',subs:[
+  {name:'North Africa',sr:['Northern Africa']},
+  {name:'West Africa',sr:['Western Africa']},
+  {name:'East Africa',sr:['Eastern Africa']},
+  {name:'Central & Southern Africa',sr:['Middle Africa','Southern Africa']}]},
+ {id:'europe',name:'Europe',subs:[
+  {name:'Northern Europe',sr:['Northern Europe']},
+  {name:'Western & Central Europe',sr:['Western Europe','Central Europe']},
+  {name:'Southern Europe',sr:['Southern Europe']},
+  {name:'Balkans & Eastern Europe',sr:['Southeast Europe','Eastern Europe']}]},
+ {id:'asia',name:'Asia',subs:[
+  {name:'Middle East & Caucasus',sr:['Western Asia']},
+  {name:'Central & South Asia',sr:['Central Asia','Southern Asia']},
+  {name:'East Asia',sr:['Eastern Asia']},
+  {name:'Southeast Asia',sr:['South-Eastern Asia']}]},
+ {id:'na',name:'North America',subs:[
+  {name:'North & Central America',sr:['North America','Central America']},
+  {name:'Caribbean',sr:['Caribbean']}]},
+ {id:'sa',name:'South America',subs:[
+  {name:'South America',sr:['South America']}]},
+ {id:'oce',name:'Oceania',subs:[
+  {name:'Australia, NZ & Melanesia',sr:['Australia and New Zealand','Melanesia']},
+  {name:'Micronesia & Polynesia',sr:['Micronesia','Polynesia']}]},
+];
+const C=window.COUNTRIES;
+const byCode=Object.fromEntries(C.map(c=>[c.c,c]));
+GROUPS.forEach(g=>g.subs.forEach(s=>{s.key=g.id+':'+s.name;s.list=C.filter(c=>s.sr.includes(c.sr)).map(c=>c.c)}));
+const ALLSUBS=GROUPS.flatMap(g=>g.subs);
+const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,'').trim();
+const ALIAS={'usa':'us','america':'us','uk':'gb','britain':'gb','great britain':'gb','england':'gb','czech republic':'cz','ivory coast':'ci','cote divoire':'ci','swaziland':'sz','burma':'mm','east timor':'tl','turkiye':'tr','congo':'cg','drc':'cd','democratic republic of the congo':'cd','uae':'ae','holland':'nl','macedonia':'mk','cabo verde':'cv','palestine':'ps','vatican':'va','korea':'kr','north korea':'kp','south korea':'kr'};
+
+/* ---------- state ---------- */
+let sel=new Set(),target=null,guessed=[],over=false,hi=-1,shown=[];
+let stats={games:0,wins:0,guesses:0,streak:0,best:0};
+try{
+  const s=JSON.parse(localStorage.getItem('fp_sel')||'null');if(s)sel=new Set(s);
+  Object.assign(stats,JSON.parse(localStorage.getItem('fp_stats')||'{}'));
+  document.getElementById('limitChoices').checked=localStorage.getItem('fp_limit')!=='0';
+}catch(e){}
+if(!sel.size)sel=new Set(ALLSUBS.filter(s=>s.key.startsWith('africa')).map(s=>s.key)); // default start
+const save=()=>{try{localStorage.setItem('fp_sel',JSON.stringify([...sel]));localStorage.setItem('fp_stats',JSON.stringify(stats))}catch(e){}};
+
+const pool=()=>[...new Set(ALLSUBS.filter(s=>sel.has(s.key)).flatMap(s=>s.list))];
+
+/* ---------- category UI ---------- */
+function renderCats(){
+  const el=document.getElementById('cats');el.innerHTML='';
+  GROUPS.forEach(g=>{
+    const row=document.createElement('div');row.className='cat';
+    const total=g.subs.reduce((n,s)=>n+s.list.length,0);
+    const allOn=g.subs.every(s=>sel.has(s.key));
+    row.innerHTML=`<div class="label"><b>${g.name}</b></div><div class="chips"></div>`;
+    const chips=row.querySelector('.chips');
+    const mk=(txt,on,cls,fn)=>{const b=document.createElement('span');b.className='chip '+cls+(on?' on':'');b.innerHTML=txt;b.onclick=fn;chips.appendChild(b)};
+    if(g.subs.length>1)mk(`All ${g.name}<small>${total}</small>`,allOn,'all',()=>{g.subs.forEach(s=>allOn?sel.delete(s.key):sel.add(s.key));changed()});
+    g.subs.forEach(s=>mk(`${s.name}<small>${s.list.length}</small>`,sel.has(s.key),'',()=>{sel.has(s.key)?sel.delete(s.key):sel.add(s.key);changed()}));
+    el.appendChild(row);
+  });
+  document.getElementById('poolInfo').textContent=pool().length+' flags selected';
+}
+function changed(){save();renderCats();if(pool().length)newGame();else{document.getElementById('msg').textContent='Pick at least one category.'}}
+document.getElementById('btnAll').onclick=()=>{ALLSUBS.forEach(s=>sel.add(s.key));changed()};
+document.getElementById('btnNone').onclick=()=>{sel.clear();save();renderCats()};
+document.getElementById('limitChoices').onchange=e=>{try{localStorage.setItem('fp_limit',e.target.checked?'1':'0')}catch(_){}};
+
+/* ---------- map ---------- */
+let world=null,features=[],featById={};
+function padId(i){return i==null?null:String(i).padStart(3,'0')}
+const VIEWS={africa:[17,2,46],europe:[14,53,30],asia:[90,32,62],na:[-98,37,50],sa:[-60,-18,33],oce:[155,-18,52]};
+function continentOf(c){return GROUPS.find(g=>g.subs.some(s=>s.sr.includes(c.sr))).id}
+function drawMap(cv,code){
+  const c=byCode[code],ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.fillStyle='#eef2f5';ctx.fillRect(0,0,W,H);
+  if(!world)return;
+  const [cx,cy,hs]=VIEWS[continentOf(c)];
+  const proj=d3.geoMercator().rotate([-cx,0]).center([0,cy]).scale((W/2)/(hs*Math.PI/180)).translate([W/2,H/2]);
+  const path=d3.geoPath(proj,ctx);
+  ctx.lineWidth=0.5;ctx.strokeStyle='#fff';ctx.fillStyle='#cfd5db';
+  for(const g of features){ctx.beginPath();path(g);ctx.fill();ctx.stroke()}
+  const f=c.id?featById[c.id]:features.find(x=>x.properties.name==='Kosovo');
+  if(f){ctx.beginPath();path(f);ctx.fillStyle='#d62828';ctx.fill();ctx.strokeStyle='#d62828';ctx.lineWidth=1;ctx.stroke()}
+  // ring so small countries / islands can still be spotted on a continent-sized map
+  const pb=f?path.bounds(f):null;
+  if(!pb||!isFinite(pb[0][0])||(pb[1][0]-pb[0][0])<W*0.05){
+    const p=pb&&isFinite(pb[0][0])?[(pb[0][0]+pb[1][0])/2,(pb[0][1]+pb[1][1])/2]:proj([c.ll[1],c.ll[0]]);
+    if(p){ctx.beginPath();ctx.arc(p[0],p[1],W*0.045,0,7);ctx.strokeStyle='#d62828';ctx.lineWidth=2.5;ctx.stroke()}
+  }
+}
+
+/* ---------- flag comparison ---------- */
+// Every flag is stretched to the same 300x200 size and each pixel snapped to the nearest of 9 base colours.
+// A 3x3 majority filter then removes 1px anti-aliasing seams, but keeps stars, crests and thin stripes.
+const GW=300,GH=200;
+const PAL=[[255,255,255],[20,20,20],[206,17,38],[255,130,0],[252,209,22],[0,150,70],[0,56,168],[129,169,215],[120,70,30]];
+function rgb2lab(r,g,b){
+  [r,g,b]=[r,g,b].map(v=>{v/=255;return v>.04045?Math.pow((v+.055)/1.055,2.4):v/12.92});
+  let x=(r*.4124+g*.3576+b*.1805)/.95047,y=(r*.2126+g*.7152+b*.0722),z=(r*.0193+g*.1192+b*.9505)/1.08883;
+  [x,y,z]=[x,y,z].map(v=>v>.008856?Math.cbrt(v):7.787*v+16/116);
+  return[116*y-16,500*(x-y),200*(y-z)];
+}
+const PLAB=PAL.map(p=>rgb2lab(...p));
+const snapCache=new Map();
+function snap(r,g,b){
+  const key=(r>>2)<<12|(g>>2)<<6|(b>>2);let v=snapCache.get(key);if(v!==undefined)return v;
+  const l=rgb2lab(r,g,b);let bi=0,bd=1e9;
+  for(let k=0;k<PAL.length;k++){const e=(l[0]-PLAB[k][0])**2+(l[1]-PLAB[k][1])**2+(l[2]-PLAB[k][2])**2;if(e<bd){bd=e;bi=k}}
+  snapCache.set(key,bi);return bi;
+}
+const imgCache={},gridCache={};
+function loadImg(code){return imgCache[code]||(imgCache[code]=new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.src='flags/'+code+'.png'}))}
+async function grid(code){
+  if(gridCache[code])return gridCache[code];
+  const img=await loadImg(code),cv=document.createElement('canvas');cv.width=GW;cv.height=GH;
+  const x=cv.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(img,0,0,GW,GH);
+  const d=x.getImageData(0,0,GW,GH).data,raw=new Uint8Array(GW*GH);
+  for(let i=0;i<GW*GH;i++)raw[i]=d[i*4+3]<128?9:snap(d[i*4],d[i*4+1],d[i*4+2]); // 9 = outside the flag (letterboxed exceptions)
+  const out=new Uint8Array(GW*GH),cnt=new Uint8Array(10);
+  for(let y=0;y<GH;y++)for(let xx=0;xx<GW;xx++){
+    cnt.fill(0);
+    for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){const yy=Math.min(GH-1,Math.max(0,y+j)),x2=Math.min(GW-1,Math.max(0,xx+i));cnt[raw[yy*GW+x2]]++}
+    let m=raw[y*GW+xx];for(let k=0;k<10;k++)if(cnt[k]>cnt[m])m=k;out[y*GW+xx]=m;
+  }
+  return gridCache[code]=out;
+}
+// Pure green/black mask: green where the guess has the same colour in the same spot as the answer, black elsewhere.
+async function compare(guess,answer,cv){
+  const [a,b]=await Promise.all([grid(guess),grid(answer)]);
+  cv.width=GW;cv.height=GH;const x=cv.getContext('2d');
+  const im=x.createImageData(GW,GH);let m=0;
+  for(let i=0;i<GW*GH;i++){
+    const ok=a[i]===b[i];if(ok)m++;
+    im.data[i*4]=ok?120:17;im.data[i*4+1]=ok?176:17;im.data[i*4+2]=ok?90:17;im.data[i*4+3]=255;
+  }
+  x.putImageData(im,0,0);
+  return Math.round(m/(GW*GH)*100);
+}
+
+/* ---------- game ---------- */
+const $=id=>document.getElementById(id);
+function newGame(){
+  const p=pool();if(!p.length)return;
+  let code;do{code=p[Math.floor(Math.random()*p.length)]}while(p.length>1&&target&&code===target.c);
+  target=byCode[code];guessed=[];over=false;
+  $('guesses').innerHTML='';$('heads').style.display='none';
+  $('mystery').style.display='flex';$('answer').classList.remove('show');
+  $('btnNext').style.display='none';$('btnGuess').style.display='';$('btnGive').style.display='';
+  $('q').disabled=false;$('q').value='';$('msg').textContent='Guess the mystery flag. Green cells show where your guess matches it.';$('msg').className='msg';
+  $('q').focus();closeDD();renderStats();
+}
+function renderStats(){
+  const avg=stats.wins?(stats.guesses/stats.wins).toFixed(1):'–';
+  $('stats').innerHTML=`Solved <b>${stats.wins}</b>/${stats.games} · avg guesses <b>${avg}</b> · streak <b>${stats.streak}</b> (best ${stats.best})`;
+}
+function candidates(){
+  const base=$('limitChoices').checked?pool():C.map(c=>c.c);
+  return base.map(c=>byCode[c]).filter(c=>!guessed.includes(c.c));
+}
+function matchList(q){
+  q=norm(q);const cand=candidates();
+  if(!q)return cand.slice().sort((a,b)=>a.n.localeCompare(b.n));
+  const alias=ALIAS[q];
+  const sc=c=>{const n=norm(c.n);if(alias===c.c)return 0;if(n.startsWith(q))return 1;if(n.split(' ').some(w=>w.startsWith(q)))return 2;if(n.includes(q))return 3;return 9};
+  return cand.map(c=>[sc(c),c]).filter(x=>x[0]<9).sort((a,b)=>a[0]-b[0]||a[1].n.localeCompare(b[1].n)).map(x=>x[1]);
+}
+function openDD(){
+  shown=matchList($('q').value).slice(0,60);hi=shown.length?0:-1;
+  const dd=$('dd');dd.innerHTML='';
+  shown.forEach((c,i)=>{const d=document.createElement('div');d.textContent=c.n;
+    d.onmousedown=e=>{e.preventDefault();submit(c)};if(i===hi)d.className='sel';dd.appendChild(d)});
+  dd.style.display=shown.length?'block':'none';
+}
+function closeDD(){$('dd').style.display='none';hi=-1}
+function moveHi(d){
+  const kids=[...$('dd').children];if(!kids.length)return;
+  kids[hi]&&kids[hi].classList.remove('sel');hi=(hi+d+kids.length)%kids.length;kids[hi].classList.add('sel');kids[hi].scrollIntoView({block:'nearest'});
+}
+$('q').addEventListener('input',openDD);
+$('q').addEventListener('focus',openDD);
+$('q').addEventListener('click',openDD);
+$('q').addEventListener('mousedown',()=>{if(document.activeElement===$('q'))openDD()});
+$('q').addEventListener('blur',()=>setTimeout(closeDD,100));
+$('q').addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'){e.preventDefault();if($('dd').style.display==='none')openDD();else moveHi(1)}
+  else if(e.key==='ArrowUp'){e.preventDefault();moveHi(-1)}
+  else if(e.key==='Enter'){e.preventDefault();doGuess()}
+  else if(e.key==='Escape')closeDD();
+});
+function doGuess(){
+  if(over)return;
+  let c=shown[hi];
+  const v=norm($('q').value);
+  const exact=candidates().find(x=>norm(x.n)===v||ALIAS[v]===x.c);
+  if(exact)c=exact;
+  if(!c){$('msg').textContent='Pick a country from the list.';$('msg').className='msg err';return}
+  submit(c);
+}
+$('btnGuess').onclick=doGuess;
+async function submit(c){
+  if(over||guessed.includes(c.c))return;
+  guessed.push(c.c);$('q').value='';closeDD();$('msg').className='msg';
+  const win=c.c===target.c;
+  const row=document.createElement('div');row.className='row'+(win?' win':'');
+  row.innerHTML=`<img class="gf" src="flags/${c.c}.png" alt=""><canvas class="sim"></canvas><canvas class="map" width="360" height="240"></canvas><div class="info"><div class="rname">#${guessed.length} ${c.n}</div><div class="rsub">${win?'Correct!':''}</div><div class="pct"></div></div>`;
+  $('heads').style.display='grid';
+  $('guesses').prepend(row);
+  drawMap(row.querySelector('canvas.map'),c.c);
+  const pct=await compare(c.c,target.c,row.querySelector('canvas.sim'));
+  row.querySelector('.pct').textContent=win?'100% match':pct+'% match';
+  if(win)finish(true);else $('q').focus();
+}
+function finish(won){
+  over=true;stats.games++;
+  if(won){stats.wins++;stats.guesses+=guessed.length;stats.streak++;stats.best=Math.max(stats.best,stats.streak)}else stats.streak=0;
+  save();renderStats();
+  $('mystery').style.display='none';
+  $('ansName').innerHTML=`${target.n} <span>${won?'– solved in '+guessed.length+(guessed.length===1?' guess':' guesses'):'– the answer'}</span>`;
+  $('ansFlag').src='flags/'+target.c+'.png';
+  $('answer').classList.add('show');
+  drawMap($('ansMap'),target.c);
+  $('btnNext').style.display='';$('btnGuess').style.display='none';$('btnGive').style.display='none';$('q').disabled=true;
+  $('msg').textContent=won?'Nice! Click “Next flag” (or press Enter).':'Gave up – study the map and flag, then try the next one.';
+  setTimeout(()=>$('btnNext').focus(),0);
+}
+$('btnGive').onclick=()=>{if(!over)finish(false)};
+$('btnNext').onclick=newGame;
+
+/* ---------- boot ---------- */
+renderCats();renderStats();newGame();
+fetch('lib/countries-50m.json').then(r=>r.json()).then(t=>{
+  world=t;features=topojson.feature(t,t.objects.countries).features;
+  features=features.filter(f=>f.properties.name!=='Antarctica');
+  features.forEach(f=>{if(f.id!=null)featById[padId(f.id)]=f});
+  // redraw any maps already requested
+  document.querySelectorAll('.row').forEach((r,i)=>{});
+  guessedRedraw();
+}).catch(()=>{$('msg').textContent='Map data failed to load – start the site with serve.py (see README).';$('msg').className='msg err'});
+function guessedRedraw(){
+  document.querySelectorAll('#guesses .row').forEach(r=>{
+    const name=r.querySelector('.rname').textContent.replace(/^#\d+\s/,'');
+    const c=C.find(x=>x.n===name);if(c)drawMap(r.querySelector('canvas.map'),c.c);
+  });
+  if(over)drawMap($('ansMap'),target.c);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&over&&document.activeElement===document.body)newGame()});
+</script>
+</body>
+</html>
