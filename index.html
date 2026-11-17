@@ -51,7 +51,8 @@ input[type=text]:focus{outline:none;border-color:var(--blue)}
 .msg.err{color:#c33}
 .legend{display:flex;gap:16px;color:var(--mute);font-size:14px;align-items:center;flex-wrap:wrap}
 .sw{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:5px}
-.target{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:18px 0 8px}
+.target{margin:0}
+.target:has(.answer.show){margin:6px 0 20px}
 .mystery{width:225px;height:150px;border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:44px;color:#bbb;background:#fafafa}
 .answer{display:none}
 .answer.show{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
@@ -88,7 +89,6 @@ canvas.map{width:120px;height:80px;display:block;background:#eef2f5;border:1px s
 <main>
   <header><h1>Flag Practice</h1><div class="stats" id="stats"></div></header>
   <div class="target">
-    <div id="mystery" class="mystery">?</div>
     <div class="answer" id="answer">
       <img id="ansFlag" class="flag" alt="">
       <div><h2 id="ansName"></h2><canvas id="ansMap" class="map" width="360" height="240"></canvas></div>
@@ -271,7 +271,7 @@ function newGame(){
   let code;do{code=p[Math.floor(Math.random()*p.length)]}while(p.length>1&&target&&code===target.c);
   target=byCode[code];guessed=[];over=false;
   $('guesses').innerHTML='';
-  $('mystery').style.display='flex';$('answer').classList.remove('show');
+  $('answer').classList.remove('show');
   $('btnNext').style.display='none';$('btnGuess').style.display='';$('btnGive').style.display='';
   $('q').disabled=false;$('q').value='';$('msg').textContent='Guess the mystery flag. Green cells show where your guess matches it.';$('msg').className='msg';
   $('q').focus();closeDD();renderStats();
@@ -341,7 +341,7 @@ function finish(won){
   over=true;stats.games++;
   if(won){stats.wins++;stats.guesses+=guessed.length;stats.streak++;stats.best=Math.max(stats.best,stats.streak)}else stats.streak=0;
   save();renderStats();
-  $('mystery').style.display='none';
+  
   $('ansName').innerHTML=`${target.n} <span>${won?'– solved in '+guessed.length+(guessed.length===1?' guess':' guesses'):'– the answer'}</span>`;
   $('ansFlag').src='flags/'+target.c+'.png';
   $('answer').classList.add('show');
