@@ -5,122 +5,112 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Flag Practice</title>
 <style>
-:root{
-  --bg:#fff;--panel:#fff;--panel2:#f5f5f5;--line:#e4e4e4;--text:#111;--mute:#777;
-  --accent:#111;--good:#2fb463;--bad:#d33;
-}
+:root{--text:#333;--mute:#777;--line:#ddd;--good:#78b05a;--blue:#2f61c9}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
-.wrap{max-width:860px;margin:0 auto;padding:28px 16px 60px}
-h1{font-size:18px;font-weight:600;margin:0;letter-spacing:-.01em}
-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--line)}
-.stats{color:var(--mute);font-size:12px}
-.stats b{color:var(--text);font-weight:600}
-.panel{margin-bottom:22px}
-details.panel summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center;padding-bottom:6px}
-details.panel summary::-webkit-details-marker{display:none}
-details.panel summary .pool{color:var(--mute);font-weight:400;font-size:12px}
-.cat{display:flex;gap:8px;align-items:flex-start;margin-top:8px;flex-wrap:wrap}
-.cat .label{width:120px;flex:none;padding-top:4px;color:var(--mute);font-size:13px}
-.cat .label b{font-weight:500}
-.chips{display:flex;gap:5px;flex-wrap:wrap;flex:1}
-.chip{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;user-select:none}
-.chip:hover{border-color:#999}
-.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.chip.all{font-weight:600}
+body{margin:0;background:#fff;color:var(--text);font:17px/1.4 Georgia,"Times New Roman",serif}
+button,input{font-family:Arial,Helvetica,sans-serif}
+#side{position:fixed;left:0;top:0;bottom:0;width:310px;background:#fff;border-right:1px solid var(--line);overflow-y:auto;padding:18px 16px 40px;z-index:30;transition:transform .25s;box-shadow:2px 0 8px rgba(0,0,0,.06)}
+body.collapsed #side{transform:translateX(-100%);box-shadow:none}
+#tab{position:fixed;top:90px;left:310px;z-index:31;background:#fff;border:1px solid var(--line);border-left:none;border-radius:0 10px 10px 0;padding:14px 8px;cursor:pointer;writing-mode:vertical-rl;font:15px Georgia,serif;color:var(--text);box-shadow:2px 2px 5px rgba(0,0,0,.12);transition:left .25s}
+body.collapsed #tab{left:0}
+#tab:hover{background:#f4f4f4}
+#side h2{margin:0 0 4px;font-size:20px;font-weight:normal}
+.pool{color:var(--mute);font-size:14px;margin-bottom:6px}
+.cat{margin-top:14px}
+.cat .label{color:var(--mute);font-size:14px;margin-bottom:5px}
+.cat .label b{font-weight:normal}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{border:1px solid #bbb;background:#fff;border-radius:8px;padding:4px 9px;font-size:13px;cursor:pointer;user-select:none;font-family:Arial,sans-serif}
+.chip:hover{border-color:#666}
+.chip.on{background:#99d37d;border-color:#7ab85f}
+.chip.all{font-weight:bold}
 .chip small{opacity:.55;margin-left:4px}
-.tools{margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--mute);font-size:12px}
-.tools label{display:flex;gap:6px;align-items:center;cursor:pointer}
-button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--text);padding:6px 12px}
-button:hover{border-color:#999}
-button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-button.primary:hover{background:#333}
-.target{display:flex;gap:16px;align-items:center;flex-wrap:wrap;min-height:150px;padding:14px 0}
-.mystery{width:225px;height:150px;border-radius:4px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:40px;color:#bbb}
+.tools{margin-top:18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--mute)}
+.tools label{display:flex;gap:6px;align-items:flex-start;cursor:pointer;width:100%}
+main{max-width:760px;margin:0 auto;padding:22px 20px 70px;transition:margin .25s}
+@media(min-width:1180px){body:not(.collapsed) main{margin-left:calc(310px + (100vw - 310px - 760px)/2)}}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:30px;font-weight:normal;margin:0}
+.stats{color:var(--mute);font-size:14px}
+.stats b{color:var(--text)}
+.lbl{font-size:18px;margin-bottom:6px}
+.box{position:relative}
+input[type=text]{width:100%;height:58px;font:22px Arial,Helvetica,sans-serif;padding:0 52px 0 10px;border:2px solid #666;border-radius:8px;background:#fff;color:#111}
+input[type=text]:focus{outline:none;border-color:var(--blue)}
+.box:after{content:"";position:absolute;right:16px;top:23px;border:13px solid transparent;border-top:17px solid #000;border-bottom:0;pointer-events:none}
+.dd{position:absolute;left:0;right:0;top:100%;margin-top:3px;background:#fff;border:2px solid #666;border-radius:8px;max-height:300px;overflow:auto;z-index:20;display:none;font:19px Arial,sans-serif}
+.dd div{padding:8px 12px;cursor:pointer}
+.dd div.sel,.dd div:hover{background:#e6eefc}
+.btns{display:flex;gap:10px;margin-top:10px}
+.btns button{height:56px;border-radius:12px;border:3px solid #999;font-size:22px;text-transform:uppercase;cursor:pointer;box-shadow:1px 2px 3px rgba(0,0,0,.35);color:#111}
+#btnGuess{flex:1;background:#99d37d}
+#btnGive{background:#dcdad6;padding:0 22px}
+#btnNext{flex:1;background:#99d37d}
+.btns button:hover{filter:brightness(.96)}
+.msg{color:var(--mute);font-size:15px;min-height:22px;margin:10px 0 2px}
+.msg.err{color:#c33}
+.legend{display:flex;gap:16px;color:var(--mute);font-size:14px;align-items:center;flex-wrap:wrap}
+.sw{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:5px}
+.target{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:18px 0 8px}
+.mystery{width:225px;height:150px;border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:44px;color:#bbb;background:#fafafa}
 .answer{display:none}
-.answer.show{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-.answer h2{margin:0 0 4px;font-size:18px;font-weight:600}
-.answer h2 span{color:var(--mute);font-size:12px;font-weight:400;display:block}
-.flag{width:225px;height:150px;object-fit:contain;background:#e8e8e8;border:1px solid var(--line);border-radius:4px;display:block}
-canvas.map{width:120px;height:80px;border-radius:4px;border:1px solid var(--line);display:block;background:#eef2f5}
-.inputrow{display:flex;gap:8px;margin:6px 0 4px;flex-wrap:wrap}
-.inputrow .box{position:relative;flex:1;min-width:220px}
-input[type=text]{width:100%;font:inherit;padding:9px 11px;border-radius:6px;border:1px solid #ccc;background:#fff;color:var(--text)}
-input[type=text]:focus{outline:none;border-color:#111}
-.dd{position:absolute;left:0;right:0;top:100%;margin-top:3px;background:#fff;border:1px solid #ccc;border-radius:6px;max-height:260px;overflow:auto;z-index:20;display:none;box-shadow:0 4px 14px rgba(0,0,0,.08)}
-.dd div{padding:6px 11px;cursor:pointer}
-.dd div.sel,.dd div:hover{background:#f0f0f0}
-.msg{color:var(--mute);font-size:12px;min-height:18px;margin-bottom:4px}
-.msg.err{color:var(--bad)}
-.legend{display:flex;gap:14px;color:var(--mute);font-size:11px;margin:2px 0 4px;align-items:center;flex-wrap:wrap}
-.sw{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:4px}
-.heads,.row{display:grid;grid-template-columns:150px 150px 120px 1fr;gap:14px;align-items:center}
-.heads{color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px;padding:0 0 6px;border-bottom:1px solid var(--line)}
-.row{padding:10px 0;border-bottom:1px solid var(--line)}
-.row img.gf{width:150px;height:100px;object-fit:contain;background:#e8e8e8;border:1px solid var(--line);border-radius:3px;display:block}
-.row canvas.sim{width:150px;height:100px;border-radius:3px;display:block;border:1px solid var(--line)}
-.rname{font-weight:600}
-.row.win .rname{color:var(--good)}
-.rsub{color:var(--mute);font-size:12px}
-.pct{font-size:15px;font-weight:600}
-@media(max-width:720px){
-  .heads{display:none}
+.answer.show{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.answer h2{margin:0 0 8px;font-size:26px;font-weight:normal}
+.answer h2 span{display:block;color:var(--mute);font-size:15px}
+.flag{width:225px;height:150px;object-fit:contain;background:#e8e8e8;box-shadow:2px 3px 6px rgba(0,0,0,.35);display:block}
+canvas.map{width:120px;height:80px;display:block;background:#eef2f5;border:1px solid #ccc}
+.row{display:grid;grid-template-columns:110px 160px 160px 120px;gap:14px;align-items:center;margin:26px 0;justify-content:start}
+.row .info{text-align:right}
+.rname{font-size:23px;line-height:1.15}
+.rsub,.pct{font-size:14px;color:var(--mute)}
+.row.win .rname{color:#3d8a2a}
+.row img.gf{width:160px;height:107px;object-fit:contain;background:#e8e8e8;box-shadow:2px 3px 6px rgba(0,0,0,.35);display:block}
+.row canvas.sim{width:160px;height:107px;box-shadow:2px 3px 6px rgba(0,0,0,.35);display:block}
+@media(max-width:700px){
   .row{grid-template-columns:1fr 1fr;}
-  .row .info{grid-column:1/-1}
-  .cat .label{width:100%}
+  .row .info{grid-column:1/-1;text-align:left;order:-1}
+  .row canvas.map{grid-column:1/-1}
 }
 </style>
 </head>
 <body>
-<div class="wrap">
-<header>
-  <h1>Flag Practice</h1>
-  <div class="stats" id="stats"></div>
-</header>
-
-<details class="panel" id="setup" open>
-  <summary><span>Choose what to practice</span><span class="pool" id="poolInfo"></span></summary>
+<button id="tab" title="Show / hide categories">Categories</button>
+<aside id="side">
+  <h2>Categories</h2>
+  <div class="pool" id="poolInfo"></div>
   <div id="cats"></div>
   <div class="tools">
-    <button id="btnAll">Whole world</button>
-    <button id="btnNone">Clear</button>
-    <label><input type="checkbox" id="limitChoices" checked> Only offer countries from my selection as answers</label>
+    <button id="btnAll" class="chip">Whole world</button>
+    <button id="btnNone" class="chip">Clear</button>
+    <label><input type="checkbox" id="limitChoices" checked> <span>Only offer countries from my selection as answers</span></label>
   </div>
-</details>
-
-<div class="panel">
-  <div class="play">
-    <div class="target">
-      <div id="mystery" class="mystery">?</div>
-      <div class="answer" id="answer">
-        <img id="ansFlag" class="flag" alt="">
-        <div><h2 id="ansName"></h2>
-          <canvas id="ansMap" class="map" width="360" height="240"></canvas>
-        </div>
-      </div>
+</aside>
+<main>
+  <header><h1>Flag Practice</h1><div class="stats" id="stats"></div></header>
+  <div class="target">
+    <div id="mystery" class="mystery">?</div>
+    <div class="answer" id="answer">
+      <img id="ansFlag" class="flag" alt="">
+      <div><h2 id="ansName"></h2><canvas id="ansMap" class="map" width="360" height="240"></canvas></div>
     </div>
   </div>
-
-  <div class="inputrow" id="inputrow">
-    <div class="box">
-      <input type="text" id="q" placeholder="Search for a country…" autocomplete="off" spellcheck="false">
-      <div class="dd" id="dd"></div>
-    </div>
-    <button class="primary" id="btnGuess">Guess</button>
+  <div class="lbl">Search for a flag...</div>
+  <div class="box">
+    <input type="text" id="q" placeholder="" autocomplete="off" spellcheck="false" aria-label="Search for a flag">
+    <div class="dd" id="dd"></div>
+  </div>
+  <div class="btns">
+    <button id="btnGuess">Guess</button>
     <button id="btnGive">Give up</button>
-    <button id="btnNext" style="display:none" class="primary">Next flag →</button>
+    <button id="btnNext" style="display:none">Next flag →</button>
   </div>
   <div class="msg" id="msg"></div>
   <div class="legend">
     <span><span class="sw" style="background:#78b05a"></span>same colour in the same spot as the mystery flag</span>
-    <span><span class="sw" style="background:#111"></span>different</span>
+    <span><span class="sw" style="background:#1f1f1f"></span>different</span>
   </div>
-</div>
-
-<div class="heads" id="heads" style="display:none"><div>Your guess</div><div>Comparison</div><div>Where it is</div><div></div></div>
-<div id="guesses"></div>
-</div>
-
+  <div id="guesses"></div>
+</main>
 <script src="lib/d3-array.min.js"></script>
 <script src="lib/d3-geo.min.js"></script>
 <script src="lib/topojson-client.min.js"></script>
@@ -280,7 +270,7 @@ function newGame(){
   const p=pool();if(!p.length)return;
   let code;do{code=p[Math.floor(Math.random()*p.length)]}while(p.length>1&&target&&code===target.c);
   target=byCode[code];guessed=[];over=false;
-  $('guesses').innerHTML='';$('heads').style.display='none';
+  $('guesses').innerHTML='';
   $('mystery').style.display='flex';$('answer').classList.remove('show');
   $('btnNext').style.display='none';$('btnGuess').style.display='';$('btnGive').style.display='';
   $('q').disabled=false;$('q').value='';$('msg').textContent='Guess the mystery flag. Green cells show where your guess matches it.';$('msg').className='msg';
@@ -339,12 +329,12 @@ async function submit(c){
   guessed.push(c.c);$('q').value='';closeDD();$('msg').className='msg';
   const win=c.c===target.c;
   const row=document.createElement('div');row.className='row'+(win?' win':'');
-  row.innerHTML=`<img class="gf" src="flags/${c.c}.png" alt=""><canvas class="sim"></canvas><canvas class="map" width="360" height="240"></canvas><div class="info"><div class="rname">#${guessed.length} ${c.n}</div><div class="rsub">${win?'Correct!':''}</div><div class="pct"></div></div>`;
-  $('heads').style.display='grid';
+  row.innerHTML=`<div class="info"><div class="rname">${c.n}</div><div class="pct"></div></div><img class="gf" src="flags/${c.c}.png" alt=""><canvas class="sim"></canvas><canvas class="map" width="360" height="240"></canvas>`;
+  
   $('guesses').prepend(row);
   drawMap(row.querySelector('canvas.map'),c.c);
   const pct=await compare(c.c,target.c,row.querySelector('canvas.sim'));
-  row.querySelector('.pct').textContent=win?'100% match':pct+'% match';
+  row.querySelector('.pct').textContent=win?'Correct! #'+guessed.length:pct+'% match';
   if(win)finish(true);else $('q').focus();
 }
 function finish(won){
@@ -363,6 +353,9 @@ function finish(won){
 $('btnGive').onclick=()=>{if(!over)finish(false)};
 $('btnNext').onclick=newGame;
 
+/* ---------- sidebar ---------- */
+try{const o=localStorage.getItem('fp_side');if(o==='0'||(o===null&&innerWidth<1180))document.body.classList.add('collapsed')}catch(e){}
+$('tab').onclick=()=>{const c=document.body.classList.toggle('collapsed');try{localStorage.setItem('fp_side',c?'0':'1')}catch(e){}};
 /* ---------- boot ---------- */
 renderCats();renderStats();newGame();
 fetch('lib/countries-50m.json').then(r=>r.json()).then(t=>{
@@ -375,7 +368,7 @@ fetch('lib/countries-50m.json').then(r=>r.json()).then(t=>{
 }).catch(()=>{$('msg').textContent='Map data failed to load – start the site with serve.py (see README).';$('msg').className='msg err'});
 function guessedRedraw(){
   document.querySelectorAll('#guesses .row').forEach(r=>{
-    const name=r.querySelector('.rname').textContent.replace(/^#\d+\s/,'');
+    const name=r.querySelector('.rname').textContent;
     const c=C.find(x=>x.n===name);if(c)drawMap(r.querySelector('canvas.map'),c.c);
   });
   if(over)drawMap($('ansMap'),target.c);
