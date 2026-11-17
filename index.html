@@ -151,10 +151,19 @@ const GROUPS=[
  {id:'oce',name:'Oceania',subs:[
   {name:'Australia, NZ & Melanesia',sr:['Australia and New Zealand','Melanesia']},
   {name:'Micronesia & Polynesia',sr:['Micronesia','Polynesia']}]},
+ {id:'theme',name:'By theme',subs:[
+  {name:"Moon / crescent",codes:["dz", "az", "bn", "km", "ly", "my", "mv", "mr", "pk", "sg", "tn", "tr", "tm", "uz"]},
+  {name:"Triangle on the left",codes:["bs", "cu", "cz", "dj", "er", "gq", "gy", "jo", "km", "mz", "ph", "ps", "sd", "ss", "st", "tl", "vu", "zw"]},
+  {name:"Stars",codes:["us", "cn", "vn", "kp", "cu", "cl", "pa", "ve", "br", "hn", "gh", "cm", "sn", "tg", "bf", "gw", "so", "dj", "lr", "ma", "cd", "gq", "st", "mz", "zw", "il", "sy", "jo", "mm", "tr", "az", "uz", "tm", "pk", "sg", "my", "ph", "au", "nz", "pg", "sb", "ws", "tv", "fm", "mh", "ba", "xk", "bi", "km", "dz", "tn", "ly", "mr", "et", "dm", "gd", "kn", "sr", "np"]},
+  {name:"Crosses",codes:["dk", "fi", "is", "no", "se", "ch", "gb", "ge", "gr", "mt", "to", "do"]},
+  {name:"Sun & circles",codes:["ar", "uy", "jp", "bd", "pw", "la", "mk", "kz", "kg", "ph", "ne", "ag", "rw", "kr", "tw"]},
+  {name:"Animals & birds",codes:["al", "mx", "eg", "zm", "ug", "zw", "dm", "pg", "lk", "bt", "md", "rs", "me", "kz", "ec", "ki", "gt", "ad"]},
+  {name:"Red, yellow & green",codes:["ml", "gn", "sn", "cm", "gh", "bj", "tg", "et", "gw", "st", "cg", "bf", "bo", "lt"]},
+  {name:"Union Jack / blue ensign",codes:["gb", "au", "nz", "fj", "tv"]}]},
 ];
 const C=window.COUNTRIES;
 const byCode=Object.fromEntries(C.map(c=>[c.c,c]));
-GROUPS.forEach(g=>g.subs.forEach(s=>{s.key=g.id+':'+s.name;s.list=C.filter(c=>s.sr.includes(c.sr)).map(c=>c.c)}));
+GROUPS.forEach(g=>g.subs.forEach(s=>{s.key=g.id+':'+s.name;s.list=s.codes||C.filter(c=>s.sr.includes(c.sr)).map(c=>c.c)}));
 const ALLSUBS=GROUPS.flatMap(g=>g.subs);
 const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,'').trim();
 const ALIAS={'usa':'us','america':'us','uk':'gb','britain':'gb','great britain':'gb','england':'gb','czech republic':'cz','ivory coast':'ci','cote divoire':'ci','swaziland':'sz','burma':'mm','east timor':'tl','turkiye':'tr','congo':'cg','drc':'cd','democratic republic of the congo':'cd','uae':'ae','holland':'nl','macedonia':'mk','cabo verde':'cv','palestine':'ps','vatican':'va','korea':'kr','north korea':'kp','south korea':'kr'};
@@ -182,7 +191,7 @@ function renderCats(){
     row.innerHTML=`<div class="label"><b>${g.name}</b></div><div class="chips"></div>`;
     const chips=row.querySelector('.chips');
     const mk=(txt,on,cls,fn)=>{const b=document.createElement('span');b.className='chip '+cls+(on?' on':'');b.innerHTML=txt;b.onclick=fn;chips.appendChild(b)};
-    if(g.subs.length>1)mk(`All ${g.name}<small>${total}</small>`,allOn,'all',()=>{g.subs.forEach(s=>allOn?sel.delete(s.key):sel.add(s.key));changed()});
+    if(g.subs.length>1&&g.id!=='theme')mk(`All ${g.name}<small>${total}</small>`,allOn,'all',()=>{g.subs.forEach(s=>allOn?sel.delete(s.key):sel.add(s.key));changed()});
     g.subs.forEach(s=>mk(`${s.name}<small>${s.list.length}</small>`,sel.has(s.key),'',()=>{sel.has(s.key)?sel.delete(s.key):sel.add(s.key);changed()}));
     el.appendChild(row);
   });
@@ -197,7 +206,7 @@ document.getElementById('limitChoices').onchange=e=>{try{localStorage.setItem('f
 let world=null,features=[],featById={};
 function padId(i){return i==null?null:String(i).padStart(3,'0')}
 const VIEWS={africa:[17,2,46],europe:[14,53,30],asia:[90,32,62],na:[-98,37,50],sa:[-60,-18,33],oce:[155,-18,52]};
-function continentOf(c){return GROUPS.find(g=>g.subs.some(s=>s.sr.includes(c.sr))).id}
+function continentOf(c){return GROUPS.find(g=>g.id!=='theme'&&g.subs.some(s=>s.sr.includes(c.sr))).id}
 function drawMap(cv,code){
   const c=byCode[code],ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
   ctx.fillStyle='#eef2f5';ctx.fillRect(0,0,W,H);
